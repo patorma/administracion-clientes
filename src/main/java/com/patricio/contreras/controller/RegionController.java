@@ -24,60 +24,60 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.patricio.contreras.entity.Ciudad;
-import com.patricio.contreras.entity.Cliente;
-import com.patricio.contreras.service.IClienteService;
+
+import com.patricio.contreras.entity.Region;
+import com.patricio.contreras.service.IRegionService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = {"http://localhost:4200" })
-public class ClienteController {
-	
+public class RegionController {
+
 	@Autowired
-	private IClienteService clienteService;
+	private IRegionService regionService;
 	
-	@GetMapping("/clientes")
-	public List<Cliente> listar() throws Exception{
-		return clienteService.listar();
+	@GetMapping("/regiones")
+	public List<Region> listar() throws Exception{
+		return regionService.listar();
 	}
 	
-	@GetMapping("/clientes/page/{page}")
-	public Page<Cliente> index(@PathVariable Integer page) throws Exception{
+	@GetMapping("/regiones/page/{page}")
+	public Page<Region> index(@PathVariable Integer page) throws Exception{
 		Pageable pageable = PageRequest.of(page, 4);
 		
-		return clienteService.findAll(pageable);
+		return regionService.findAll(pageable);
 	}
 	
-	@GetMapping("/cliente/{id}")
+	@GetMapping("/region/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) throws Exception{
 		
-		Cliente cliente = null;
+		Region region = null;
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			//lista por id la informacion de un  cliente
-			cliente = clienteService.listarPorId(id);
+			//lista por id la informacion de una region
+			region= regionService.listarPorId(id);
 		} catch (DataAccessException e) {
 			response.put("mensaje", "Error al realizar la consulta en la base de datos!");
 			response.put("error",e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		if(cliente == null) {
-			response.put("mensaje", "El cliente con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
+		if(region == null) {
+			response.put("mensaje", "La región con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.NOT_FOUND);
 		}
 		
-		return new ResponseEntity<Cliente>(cliente,HttpStatus.OK);
+		return new ResponseEntity<Region>(region,HttpStatus.OK);
 	}
 	
-	@PostMapping("/cliente")
-	public ResponseEntity<?> create(@Valid @RequestBody Cliente cliente,BindingResult result ) throws Exception{
-		// es el nuevo cliente creado
+	@PostMapping("/region")
+	public ResponseEntity<?> create(@Valid @RequestBody Region region,BindingResult result ) throws Exception{
+		// es la nueva región creada
 		//se inicializa
-		Cliente clienteNew = null;
+		Region regionNew = null;
 		Map<String, Object> response =new HashMap<>();
 	if(result.hasErrors()) {
 			
@@ -89,24 +89,24 @@ public class ClienteController {
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.BAD_REQUEST);
 		}
 	try {
-		  clienteNew = clienteService.registrar(cliente);
+		  regionNew = regionService.registrar(region);
 		} catch (DataAccessException e) {
 		response.put("mensaje", "Error al realizar el insert en la base de datos!");
 		response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 		return new ResponseEntity<Map<String, Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-	 response.put("mensaje", "El cliente ha sido creado con éxito! ");
-	 response.put("cliente",clienteNew);
+	 response.put("mensaje", "La región ha sido creada con éxito! ");
+	 response.put("región",regionNew);
 	 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@PutMapping("/cliente/{id}")
-	public ResponseEntity<?> update(@Valid @RequestBody Cliente cliente,BindingResult result,@PathVariable Long id) throws Exception{
-		//se obtiene el cliente  que se quiere modificar
-		Cliente clienteActual = clienteService.listarPorId(id);
+	@PutMapping("/region/{id}")
+	public ResponseEntity<?> update(@Valid @RequestBody Region region,BindingResult result,@PathVariable Long id) throws Exception{
+		//se obtiene la región que se quiere modificar
+		Region regionActual = regionService.listarPorId(id);
 		
-		//cliente ya actualizado
-		Cliente clienteUpdated = null;
+		//región ya actualizada
+		Region regionUpdated = null;
 		
 		Map<String, Object> response = new HashMap<>();
 		
@@ -125,63 +125,50 @@ public class ClienteController {
 			
 			// en lo anterior se recibe un field errors y lo convertimos a string
 		}
-		if(clienteActual == null) {
-			response.put("mensaje", "Error: no se pudo editar, el cliente con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
+		if(regionActual == null) {
+			response.put("mensaje", "Error: no se pudo editar, la región con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
 			return new ResponseEntity<Map<String, Object>>(response,HttpStatus.NOT_FOUND);
 		}
 		
 		try {
-			//modificamos los datos del cliente actual con los datos del cliente que te envian
-			clienteActual.setNombre(cliente.getNombre());
-			clienteActual.setApellido(cliente.getNombre());
-			clienteActual.setEmail(cliente.getEmail());
-			clienteActual.setFechaNacimiento(cliente.getFechaNacimiento());
-			clienteActual.setTelefono(cliente.getTelefono());
-			clienteActual.setCiudad(cliente.getCiudad());
+			//modificamos los datos de la región actual con los datos de la region que te envian
+			regionActual.setNombreRegion(region.getNombreRegion());
 			
-			clienteUpdated = clienteService.registrar(clienteActual);
+			regionUpdated = regionService.registrar(regionActual);
 			
 		} catch (DataAccessException e) {
-			response.put("mensaje", "Error al actualizar el gasto en la base de datos!");
+			response.put("mensaje", "Error al actualizar la región en la base de datos!");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		response.put("mensaje", "El cliente ha sido actualizado con éxito!");
-		response.put("cliente",clienteUpdated);
+		response.put("mensaje", "La región ha sido actualizada con éxito!");
+		response.put("región",regionUpdated);
 		
 		return new ResponseEntity<Map<String,Object>>(response,HttpStatus.CREATED);
 		
 		
 	}
 	
-	@DeleteMapping("/cliente/{id}")
+	@DeleteMapping("/region/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) throws Exception{
 		
-		Cliente cliente = clienteService.listarPorId(id);
+		Region region = regionService.listarPorId(id);
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			if(cliente == null) {
-				  response.put("mensaje", "No se encontró el cliente con el ID: " + id);
+			if(region == null) {
+				  response.put("mensaje", "No se encontró la región con el ID: " + id);
 		          return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 			}
 			
-			clienteService.eliminar(id);
+			regionService.eliminar(id);
 		} catch (DataAccessException e) {
-			response.put("mensaje", "No se pudo eliminar el cliente!");
+			response.put("mensaje", "No se pudo eliminar la región!");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		response.put("mensaje", "El cliente fue eliminado con éxito!");
+		response.put("mensaje", "La región fue eliminada con éxito!");
 		return new ResponseEntity<Map<String, Object>>(response,HttpStatus.OK);
 	}
-	
-	//se listan ciudaes disponibles para asociar una al cliente
-	// en el frontend
-	@GetMapping("/clientes/ciudades")
-	public List<Ciudad> listarCiudades(){
-		return clienteService.findAllCiudades();
-	}
-
 }

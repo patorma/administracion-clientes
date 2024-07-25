@@ -25,59 +25,59 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.patricio.contreras.entity.Ciudad;
-import com.patricio.contreras.entity.Cliente;
-import com.patricio.contreras.service.IClienteService;
+import com.patricio.contreras.entity.Region;
+import com.patricio.contreras.service.ICiudadService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = {"http://localhost:4200" })
-public class ClienteController {
-	
+public class CiudadController {
+ 
 	@Autowired
-	private IClienteService clienteService;
+	private ICiudadService ciudadService;
 	
-	@GetMapping("/clientes")
-	public List<Cliente> listar() throws Exception{
-		return clienteService.listar();
+	@GetMapping("/ciudades")
+	public List<Ciudad> listar() throws Exception{
+		return ciudadService.listar();
 	}
 	
-	@GetMapping("/clientes/page/{page}")
-	public Page<Cliente> index(@PathVariable Integer page) throws Exception{
+	@GetMapping("/ciudades/page/{page}")
+	public Page<Ciudad> index(@PathVariable Integer page) throws Exception{
 		Pageable pageable = PageRequest.of(page, 4);
 		
-		return clienteService.findAll(pageable);
+		return ciudadService.findAll(pageable);
 	}
 	
-	@GetMapping("/cliente/{id}")
+	@GetMapping("/ciudad/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) throws Exception{
 		
-		Cliente cliente = null;
+		Ciudad ciudad = null;
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			//lista por id la informacion de un  cliente
-			cliente = clienteService.listarPorId(id);
+			//lista por id la informacion de una ciudad
+			ciudad= ciudadService.listarPorId(id);
 		} catch (DataAccessException e) {
 			response.put("mensaje", "Error al realizar la consulta en la base de datos!");
 			response.put("error",e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		if(cliente == null) {
-			response.put("mensaje", "El cliente con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
+		if(ciudad == null) {
+			response.put("mensaje", "La ciudad con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.NOT_FOUND);
 		}
 		
-		return new ResponseEntity<Cliente>(cliente,HttpStatus.OK);
+		return new ResponseEntity<Ciudad>(ciudad,HttpStatus.OK);
 	}
 	
-	@PostMapping("/cliente")
-	public ResponseEntity<?> create(@Valid @RequestBody Cliente cliente,BindingResult result ) throws Exception{
-		// es el nuevo cliente creado
+	@PostMapping("/ciudad")
+	public ResponseEntity<?> create(@Valid @RequestBody Ciudad ciudad,BindingResult result ) throws Exception{
+		// es la nueva ciudad creada
 		//se inicializa
-		Cliente clienteNew = null;
+		Ciudad ciudadNew = null;
 		Map<String, Object> response =new HashMap<>();
 	if(result.hasErrors()) {
 			
@@ -89,24 +89,24 @@ public class ClienteController {
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.BAD_REQUEST);
 		}
 	try {
-		  clienteNew = clienteService.registrar(cliente);
+		  ciudadNew = ciudadService.registrar(ciudad);
 		} catch (DataAccessException e) {
 		response.put("mensaje", "Error al realizar el insert en la base de datos!");
 		response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 		return new ResponseEntity<Map<String, Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-	 response.put("mensaje", "El cliente ha sido creado con éxito! ");
-	 response.put("cliente",clienteNew);
+	 response.put("mensaje", "La ciudad ha sido creada con éxito! ");
+	 response.put("ciudad",ciudadNew);
 	 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 	
-	@PutMapping("/cliente/{id}")
-	public ResponseEntity<?> update(@Valid @RequestBody Cliente cliente,BindingResult result,@PathVariable Long id) throws Exception{
-		//se obtiene el cliente  que se quiere modificar
-		Cliente clienteActual = clienteService.listarPorId(id);
+	@PutMapping("/ciudad/{id}")
+	public ResponseEntity<?> update(@Valid @RequestBody Ciudad ciudad,BindingResult result,@PathVariable Long id) throws Exception{
+		//se obtiene la ciudad que se quiere modificar
+		Ciudad ciudadActual = ciudadService.listarPorId(id);
 		
-		//cliente ya actualizado
-		Cliente clienteUpdated = null;
+		//ciudad ya actualizada
+		Ciudad ciudadUpdated = null;
 		
 		Map<String, Object> response = new HashMap<>();
 		
@@ -125,63 +125,56 @@ public class ClienteController {
 			
 			// en lo anterior se recibe un field errors y lo convertimos a string
 		}
-		if(clienteActual == null) {
-			response.put("mensaje", "Error: no se pudo editar, el cliente con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
+		if(ciudadActual == null) {
+			response.put("mensaje", "Error: no se pudo editar, la ciudad con ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
 			return new ResponseEntity<Map<String, Object>>(response,HttpStatus.NOT_FOUND);
 		}
 		
 		try {
-			//modificamos los datos del cliente actual con los datos del cliente que te envian
-			clienteActual.setNombre(cliente.getNombre());
-			clienteActual.setApellido(cliente.getNombre());
-			clienteActual.setEmail(cliente.getEmail());
-			clienteActual.setFechaNacimiento(cliente.getFechaNacimiento());
-			clienteActual.setTelefono(cliente.getTelefono());
-			clienteActual.setCiudad(cliente.getCiudad());
+			//modificamos los datos de la ciudad actual con los datos de la ciudad que te envian
+			ciudadActual.setNombreCiudad(ciudad.getNombreCiudad());
+			ciudadActual.setRegion(ciudad.getRegion());
 			
-			clienteUpdated = clienteService.registrar(clienteActual);
+			ciudadUpdated = ciudadService.registrar(ciudadActual);
 			
 		} catch (DataAccessException e) {
-			response.put("mensaje", "Error al actualizar el gasto en la base de datos!");
+			response.put("mensaje", "Error al actualizar la ciudad en la base de datos!");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		response.put("mensaje", "El cliente ha sido actualizado con éxito!");
-		response.put("cliente",clienteUpdated);
+		response.put("mensaje", "La ciudad ha sido actualizada con éxito!");
+		response.put("ciudad",ciudadUpdated);
 		
 		return new ResponseEntity<Map<String,Object>>(response,HttpStatus.CREATED);
 		
 		
 	}
 	
-	@DeleteMapping("/cliente/{id}")
+	@DeleteMapping("/ciudad/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) throws Exception{
 		
-		Cliente cliente = clienteService.listarPorId(id);
+		Ciudad ciudad = ciudadService.listarPorId(id);
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			if(cliente == null) {
-				  response.put("mensaje", "No se encontró el cliente con el ID: " + id);
+			if(ciudad == null) {
+				  response.put("mensaje", "No se encontró la ciudad con el ID: " + id);
 		          return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 			}
 			
-			clienteService.eliminar(id);
+			ciudadService.eliminar(id);
 		} catch (DataAccessException e) {
-			response.put("mensaje", "No se pudo eliminar el cliente!");
+			response.put("mensaje", "No se pudo eliminar la ciudad!");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		response.put("mensaje", "El cliente fue eliminado con éxito!");
+		response.put("mensaje", "La ciudad fue eliminada con éxito!");
 		return new ResponseEntity<Map<String, Object>>(response,HttpStatus.OK);
 	}
 	
-	//se listan ciudaes disponibles para asociar una al cliente
-	// en el frontend
-	@GetMapping("/clientes/ciudades")
-	public List<Ciudad> listarCiudades(){
-		return clienteService.findAllCiudades();
+	@GetMapping("ciudades/regiones")
+	public List<Region> listarRegiones(){
+		return ciudadService.findAllRegiones();
 	}
-
 }

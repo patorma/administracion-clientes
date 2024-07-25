@@ -29,7 +29,7 @@ public class Region implements Serializable{
 	
 	@Column(name = "nombre_region",nullable=false )
 	@NotEmpty
-	@Size(min = 3,max = 20)
+	@Size(min = 3,max = 90)
 	private String nombreRegion;
 	
 	private static final long serialVersionUID = 1L;

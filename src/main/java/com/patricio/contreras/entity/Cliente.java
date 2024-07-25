@@ -47,16 +47,17 @@ public class Cliente implements Serializable {
 	private String apellido;
 	
 	@Column(unique = true,nullable=false,length = 90)
+	@NotEmpty
 	private String email;
 	
 	@Column(nullable =false)
-	@NotEmpty
-	private int telefono;
+	@NotNull(message = "no puede estar vacio el telefono2")
+	private Integer telefono;
 	
-	@Column(name = "fecha_registro")
+	@Column(name = "fecha_nacimiento")
 	@NotNull(message = "no puede estar vacia la fecha")
 	@Temporal(TemporalType.DATE)
-	private Date fechaRegistro;
+	private Date fechaNacimiento;
 	
 	@NotNull(message = "no puede estar vacio")
 	@ManyToOne(fetch = FetchType.LAZY)
