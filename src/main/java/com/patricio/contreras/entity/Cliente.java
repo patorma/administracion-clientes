@@ -1,14 +1,23 @@
 package com.patricio.contreras.entity;
 
 import java.io.Serializable;
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,6 +52,17 @@ public class Cliente implements Serializable {
 	@Column(nullable =false)
 	@NotEmpty
 	private int telefono;
+	
+	@Column(name = "fecha_registro")
+	@NotNull(message = "no puede estar vacia la fecha")
+	@Temporal(TemporalType.DATE)
+	private Date fechaRegistro;
+	
+	@NotNull(message = "no puede estar vacio")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ciudad_id")
+	@JsonIgnoreProperties({"hibernateLazyInitializer","hadler"})
+	private Ciudad ciudad;
 	
 	private static final long serialVersionUID = 1L;
 
